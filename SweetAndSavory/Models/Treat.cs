@@ -5,9 +5,9 @@ namespace SweetAndSavory.Models
 {
     public class Treat
     {
-        public int TreatId { get; set}
+        public int TreatId { get; set; }
         [Display(Name = "Treat Name: ")]
-        public string TreatName { get; set}
-        public List<FlavorTreat> Join Entities {get; }
-}
+        public string TreatName { get; set; }
+        public List<FlavorTreat> JoinEntities { get; }
+    }
 }
