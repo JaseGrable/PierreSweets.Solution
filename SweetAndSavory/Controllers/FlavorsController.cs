@@ -8,29 +8,40 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using System.Threading.Tasks;
 using System.Security.Claims;
+
 namespace SweetAndSavory.Controllers
 {
+    [Authorize]
     public class FlavorsController : Controller
     {
         private readonly SweetAndSavoryContext _db;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public FlavorsController(SweetAndSavoryContext db)
+        public FlavorsController(UserManager<ApplicationUser> userManager, SweetAndSavoryContext db)
         {
+            _userManager = userManager;
             _db = db;
         }
 
-        public ActionResult Index()
+        public async Task<ActionResult> Index()
         {
+
+            string userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            ApplicationUser currentUser = await _userManager.FindByIdAsync(userId);
+
             List<Flavor> model = _db.Flavors.ToList();
             ViewBag.PageTitle = "View Flavors";
             return View(model);
         }
 
+
+        [Authorize(Policy = "RequireAdministratorRole")]
         public ActionResult Create()
         {
             return View();
         }
 
+        [Authorize(Policy = "RequireAdministratorRole")]
         [HttpPost]
         public ActionResult Create(Flavor flavor)
         {
@@ -48,13 +59,14 @@ namespace SweetAndSavory.Controllers
             ViewBag.PageTitle = "Flavor Details";
             return View(thisFlavor);
         }
+        [Authorize(Policy = "RequireAdministratorRole")]
         public ActionResult Edit(int id)
         {
             Flavor thisFlavor = _db.Flavors.FirstOrDefault(flavor => flavor.FlavorId == id);
             ViewBag.PageTitle = "Edit Flavor";
             return View(thisFlavor);
         }
-
+        [Authorize(Policy = "RequireAdministratorRole")]
         [HttpPost]
         public ActionResult Edit(Flavor flavor)
         {
@@ -62,6 +74,7 @@ namespace SweetAndSavory.Controllers
             _db.SaveChanges();
             return RedirectToAction("Index");
         }
+        [Authorize(Policy = "RequireAdministratorRole")]
         public ActionResult Delete(int id)
         {
             Flavor thisFlavor = _db.Flavors.FirstOrDefault(flavor => flavor.FlavorId == id);
@@ -69,6 +82,7 @@ namespace SweetAndSavory.Controllers
             return View(thisFlavor);
         }
 
+        [Authorize(Policy = "RequireAdministratorRole")]
         [HttpPost, ActionName("Delete")]
         public ActionResult DeleteConfirmed(int id)
         {
@@ -77,6 +91,7 @@ namespace SweetAndSavory.Controllers
             _db.SaveChanges();
             return RedirectToAction("Index");
         }
+        [Authorize(Policy = "RequireAdministratorRole")]
         public ActionResult AddTreat(int id)
         {
             Flavor thisFlavor = _db.Flavors.FirstOrDefault(flavors => flavors.FlavorId == id);
